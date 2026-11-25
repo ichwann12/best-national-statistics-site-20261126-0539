@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NusaStat — Portal Statistik Indonesia</title>
+<meta name="description" content="NusaStat: an independent, offline national statistics portal for Indonesia — population, economy, provinces, education and health, with charts and tables.">
+<link rel="stylesheet" href="style.css">
+<script src="data.js"></script>
+<script src="charts.js"></script>
+<script src="views.js"></script>
+<script src="main.js" defer></script>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#/">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><rect x="2" y="2" width="36" height="36" rx="9" fill="#0b5d4e"/><path d="M10 27 L16 18 L21 23 L26 13 L30 16" fill="none" stroke="#f5b942" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30" cy="12" r="2.4" fill="#f5b942"/></svg>
+      <span class="brand-text"><strong>NusaStat</strong><em>Portal Statistik Indonesia</em></span>
+    </a>
+    <nav class="main-nav" aria-label="Sections">
+      <a href="#/" data-nav="overview">Overview</a>
+      <a href="#/population" data-nav="population">Population</a>
+      <a href="#/economy" data-nav="economy">Economy</a>
+      <a href="#/provinces" data-nav="provinces">Provinces</a>
+      <a href="#/education-health" data-nav="education-health">Education &amp; Health</a>
+    </nav>
+  </div>
+</header>
+<main id="app" class="wrap"></main>
+<footer class="site-footer">
+  <div class="wrap">
+    <p><strong>About the figures.</strong> Every number on this site is a rounded approximation compiled from Badan Pusat Statistik (BPS) publications covering 2019–2024. Figures are shown rounded to keep them readable; for exact official releases, consult BPS directly. NusaStat is an independent, unofficial portal — it is not affiliated with BPS or any government body.</p>
+    <p class="foot-meta">NusaStat · Indonesia in numbers · Data years 2019–2024 · Works fully offline, no network requests.</p>
+  </div>
+</footer>
+</body>
+</html>
