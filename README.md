@@ -13,6 +13,7 @@ An independent, fully offline national statistics portal for Indonesia. Pure sta
 - **Economy** — switchable chart (GDP growth / inflation / unemployment), GDP sector mix, economy facts, annual indicators table.
 - **Provinces** — top-10 population chart plus a table of all 38 provinces (population, area, density) with live search and sortable columns.
 - **Education & health** — tabbed panels: literacy, schooling, universities; life expectancy, infant mortality, stunting, hospitals.
+- **Prices & trade** — switchable chart (inflation by expenditure group / exports by commodity / imports by commodity / staple food prices), exports-vs-imports grouped-bar chart, inflation-by-group-over-time chart with a group picker, exports/imports-by-region chart, monthly 2024 inflation chart, trade-balance table 2019–2024, staple-food price table, and a sortable, searchable table of the top 12 trading partners.
 
 ## Data
 
@@ -21,13 +22,13 @@ Every figure is a rounded approximation compiled from Badan Pusat Statistik (BPS
 ## Structure
 
 - `app/index.html` — page shell, header nav, footer
-- `app/data.js` — all statistics (KPIs, series, provinces, education & health)
-- `app/charts.js` — dependency-free canvas bar/line charts
+- `app/data.js` — all statistics (KPIs, series, provinces, education & health, prices & trade)
+- `app/charts.js` — dependency-free canvas bar/line/grouped-bar charts
 - `app/views.js` — one renderer per section, with its controls
-- `app/main.js` — hash router (`#/`, `#/population`, `#/economy`, `#/provinces`, `#/education-health`)
+- `app/main.js` — hash router (`#/`, `#/population`, `#/economy`, `#/provinces`, `#/education-health`, `#/prices-trade`)
 - `app/style.css` — the site's own design (deep teal + amber), responsive down to phones
 - `main.ts` — hand-in program: copies `app/` and `screenshots/` to the output dir and writes `dossier.json` with the vendored make.fun library
 
 ## Screenshots
 
-In `screenshots/`: the overview dashboard (desktop), the economy page (desktop), the provinces page (desktop), and the overview on a phone (390 × 844).
+In `screenshots/`: the overview dashboard (desktop), the prices & trade page (desktop), the provinces page (desktop), and the overview on a phone (390 × 844).

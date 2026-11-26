@@ -138,6 +138,29 @@ main { padding: 26px 0 10px; }
 .sort-btn.is-sorted { color: var(--teal); font-weight: 800; }
 .empty-cell { text-align: center; color: var(--muted); padding: 22px !important; }
 
+/* Prices & trade section */
+.select-box { font-size: 0.92rem; font-weight: 600; display: block; margin: 2px 0 10px; }
+.select-box select {
+  font: inherit; font-weight: 400; padding: 7px 10px; margin-left: 6px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink);
+  max-width: 100%;
+}
+.select-box select:focus { outline: 2px solid var(--teal-light); border-color: var(--teal); }
+.bal-pos { color: var(--teal); font-weight: 700; }
+.bal-neg { color: #c0503c; font-weight: 700; }
+.note-cell { font-size: 0.88rem; color: var(--muted); min-width: 220px; }
+#price-chart { min-height: 340px; }
+#trade-balance-chart { min-height: 320px; }
+/* Keep the wide partners table readable on phones: the note column wraps
+   instead of forcing a long horizontal scroll. */
+@media (max-width: 860px) {
+  .note-cell { min-width: 160px; }
+}
+@media (max-width: 640px) {
+  .note-cell { min-width: 140px; font-size: 0.84rem; }
+  #price-chart { min-height: 300px; }
+}
+
 /* Footer */
 .site-footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 22px 0 30px; color: var(--muted); font-size: 0.9rem; }
 .foot-meta { margin-top: 6px; }

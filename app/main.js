@@ -7,6 +7,7 @@
 //   #/economy             Economy
 //   #/provinces           Provinces table
 //   #/education-health    Education & health
+//   #/prices-trade        Prices & trade (inflation, exports, imports)
 
 (function () {
   var VIEWS = window.NUSAViews;
@@ -21,6 +22,7 @@
     '/economy': VIEWS.economy,
     '/provinces': VIEWS.provinces,
     '/education-health': VIEWS.educationHealth,
+    '/prices-trade': VIEWS.pricesTrade,
   };
 
   var TITLES = {
@@ -30,6 +32,7 @@
     '/economy': 'Economy | NusaStat',
     '/provinces': 'Provinces | NusaStat',
     '/education-health': 'Education & health | NusaStat',
+    '/prices-trade': 'Prices & trade | NusaStat',
   };
 
   function render() {

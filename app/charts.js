@@ -142,34 +142,123 @@
   }
 
   // Horizontal bar list used for the GDP sector mix and province top 10.
+  // Handles negative values (e.g. a CPI group that fell): bars grow left
+  // from a zero line instead of drawing backwards over the labels.
   function drawHbars(canvas, rows, opts) {
     opts = opts || {};
     var s = setupCanvas(canvas);
     var ctx = s.ctx;
     var padL = 172, padR = 52, padT = 8, padB = 8;
     var x0 = padL, x1 = s.w - padR;
-    var max = niceMax(Math.max.apply(null, rows.map(function (r) { return r.value; })) * 1.1);
+    var vals = rows.map(function (r) { return r.value; });
+    var minV = Math.min.apply(null, vals.concat([0]));
+    var maxV = Math.max.apply(null, vals.concat([0]));
+    var max = niceMax(maxV * 1.1);
+    var min = minV < 0 ? -niceMax(-minV * 1.1) : 0;
+    var span = max - min || 1;
+    function vx(v) { return x0 + ((v - min) / span) * (x1 - x0); }
+    var zeroX = vx(0);
     var rowH = (s.h - padT - padB) / rows.length;
     ctx.font = '12px system-ui, sans-serif';
+    // Zero line, only drawn when some value is negative.
+    if (min < 0) {
+      ctx.strokeStyle = RED;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(zeroX, padT);
+      ctx.lineTo(zeroX, s.h - padB);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
     for (var i = 0; i < rows.length; i++) {
       var y = padT + rowH * i + rowH * 0.18;
       var bh = rowH * 0.56;
-      var bw = ((rows[i].value / max) * (x1 - x0));
+      var v = rows[i].value;
+      var bx = Math.min(zeroX, vx(v));
+      var bw = Math.abs(vx(v) - zeroX);
       ctx.fillStyle = INK;
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       ctx.fillText(rows[i].label, x0 - 8, y + bh / 2);
-      ctx.fillStyle = i === 0 ? AMBER : TEAL_LIGHT;
-      ctx.fillRect(x0, y, Math.max(bw, 2), bh);
+      ctx.fillStyle = v < 0 ? RED : (i === 0 ? AMBER : TEAL_LIGHT);
+      ctx.fillRect(bx, y, Math.max(bw, 2), bh);
       ctx.fillStyle = INK;
-      ctx.textAlign = 'left';
-      ctx.fillText(fmt(rows[i].value) + (opts.suffix || ''), x0 + bw + 7, y + bh / 2);
+      ctx.textAlign = v < 0 ? 'right' : 'left';
+      ctx.fillText(fmt(v) + (opts.suffix || ''), v < 0 ? bx - 7 : zeroX + bw + 7, y + bh / 2);
     }
+  }
+
+  // Grouped bars: two series side by side per category, e.g. exports and
+  // imports for the same year. Values may be negative; the zero line is drawn.
+  function drawGroupedBars(canvas, labels, series, opts) {
+    opts = opts || {};
+    var s = setupCanvas(canvas);
+    var ctx = s.ctx;
+    var padL = 52, padR = 14, padT = 20, padB = 34;
+    var x0 = padL, y0 = padT, x1 = s.w - padR, y1 = s.h - padB;
+    var all = [];
+    series.forEach(function (ser) { ser.values.forEach(function (v) { all.push(v); }); });
+    var min = Math.min.apply(null, all.concat([0]));
+    var max = Math.max.apply(null, all.concat([0]));
+    var span = max - min || 1;
+    var top = max + span * 0.12;
+    var bottom = min - span * 0.12;
+    axes(ctx, x0, y0, x1, y1, bottom, top, 4);
+    function py(v) { return y1 - ((v - bottom) / (top - bottom)) * (y1 - y0); }
+    // Zero line, dashed, so negative bars read as below the line.
+    ctx.strokeStyle = RED;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(x0, py(0));
+    ctx.lineTo(x1, py(0));
+    ctx.stroke();
+    ctx.setLineDash([]);
+    var colors = [TEAL, AMBER];
+    var n = labels.length;
+    var slot = (x1 - x0) / n;
+    var groupW = Math.min(64, slot * 0.66);
+    var barW = groupW / series.length;
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < n; i++) {
+      var gx = x0 + slot * (i + 0.5) - groupW / 2;
+      for (var j = 0; j < series.length; j++) {
+        var v = series[j].values[i];
+        var bx = gx + j * barW;
+        var topY = Math.min(py(v), py(0));
+        var h = Math.abs(py(v) - py(0));
+        ctx.fillStyle = colors[j % colors.length];
+        ctx.beginPath();
+        ctx.fillRect(bx + 1, topY, Math.max(barW - 2, 1), Math.max(h, 1));
+        ctx.fillStyle = INK;
+        ctx.fillText(fmt(v) + (opts.suffix || ''), bx + barW / 2, v >= 0 ? topY - 15 : topY + h + 4);
+      }
+      ctx.fillStyle = MUTED;
+      ctx.fillText(labels[i], x0 + slot * (i + 0.5), y1 + 8);
+    }
+    // Legend, drawn above the plot area, right-aligned so it never sits
+    // next to the top axis tick label.
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    var legendW = 0;
+    series.forEach(function (ser) {
+      legendW += 17 + ctx.measureText(ser.name).width + 22;
+    });
+    var lx = x1 - (legendW - 22);
+    series.forEach(function (ser, k) {
+      ctx.fillStyle = colors[k % colors.length];
+      ctx.fillRect(lx, y0 - 12, 12, 12);
+      ctx.fillStyle = INK;
+      ctx.fillText(ser.name, lx + 17, y0 - 6);
+      lx += 17 + ctx.measureText(ser.name).width + 22;
+    });
   }
 
   window.NUSACharts = {
     drawBarChart: drawBarChart,
     drawLineChart: drawLineChart,
     drawHbars: drawHbars,
+    drawGroupedBars: drawGroupedBars,
   };
 })();
