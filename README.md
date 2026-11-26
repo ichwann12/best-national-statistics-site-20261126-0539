@@ -11,7 +11,7 @@ An independent, fully offline national statistics portal for Indonesia. Pure sta
 - **Overview** — key indicators (population 283.5 m, GDP Rp 22,139 tn, growth 5.03%, inflation 1.57%, unemployment 4.91%, poverty 8.57%, life expectancy 74.2 yrs, HDI 75.02), GDP-growth and population charts, latest releases.
 - **Population & demographics** — switchable chart (total population 2015–2024 / age structure / urban vs rural), demographic facts, population-by-year table.
 - **Economy** — switchable chart (GDP growth / inflation / unemployment), GDP sector mix, economy facts, annual indicators table.
-- **Provinces** — top-10 population chart plus a table of all 38 provinces (population, area, density) with live search and sortable columns.
+- **Provinces** — top-10 population chart plus a table of all 38 provinces (population, area, density) with live search and sortable columns, and a "Bandingkan Provinsi" panel: pick any two provinces (default Jawa Barat vs Jawa Timur), swap them, and compare population, area, density and share of the national total side by side, with a paired bar chart.
 - **Education & health** — tabbed panels: literacy, schooling, universities; life expectancy, infant mortality, stunting, hospitals.
 - **Prices & trade** — switchable chart (inflation by expenditure group / exports by commodity / imports by commodity / staple food prices), exports-vs-imports grouped-bar chart, inflation-by-group-over-time chart with a group picker, exports/imports-by-region chart, monthly 2024 inflation chart, trade-balance table 2019–2024, staple-food price table, and a sortable, searchable table of the top 12 trading partners.
 
@@ -31,4 +31,4 @@ Every figure is a rounded approximation compiled from Badan Pusat Statistik (BPS
 
 ## Screenshots
 
-In `screenshots/`: the overview dashboard (desktop), the prices & trade page (desktop), the provinces page (desktop), and the overview on a phone (390 × 844).
+In `screenshots/`: the overview dashboard (desktop), the prices & trade page (desktop), the provinces page (desktop, showing the Bandingkan Provinsi panel), and the overview on a phone (390 × 844).

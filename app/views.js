@@ -207,6 +207,90 @@
         + '<td>' + p.pop.toFixed(1) + '</td><td>' + p.area.toLocaleString('en-US') + '</td><td>' + density(p).toLocaleString('en-US') + '</td></tr>';
     }).join('');
   }
+  // ------------------------------------------- compare provinces (new panel)
+  // Which two provinces the compare panel shows; Jawa Barat vs Jawa Timur
+  // are the two most populous, so they are the natural default pair.
+  var cmpAName = 'Jawa Barat';
+  var cmpBName = 'Jawa Timur';
+
+  // Look a province up by name; fall back to the first province so a stale
+  // saved name never leaves the panel empty.
+  function findProvince(name) {
+    var hit = null;
+    D.provinces.forEach(function (p) { if (p.name === name) hit = p; });
+    return hit || D.provinces[0];
+  }
+
+  // National population implied by the 38 province figures (the rounded
+  // provincial numbers add up to about 283.5 million).
+  function nationalPopTotal() {
+    var total = 0;
+    D.provinces.forEach(function (p) { total += p.pop; });
+    return total;
+  }
+
+  function shareOfNational(p) {
+    return (p.pop / nationalPopTotal()) * 100;
+  }
+
+  // The <option> list for a compare dropdown, with one province pre-selected.
+  function cmpOptions(selectedName) {
+    return D.provinces.map(function (p) {
+      return '<option value="' + esc(p.name) + '"' + (p.name === selectedName ? ' selected' : '') + '>' + esc(p.name) + '</option>';
+    }).join('');
+  }
+
+  // One row of the side-by-side table: label, value for A, value for B, and
+  // the gap between them (A minus B) so the reader sees who is ahead at once.
+  function cmpRow(label, aVal, bVal, gap) {
+    return '<tr><th scope="row">' + esc(label) + '</th><td>' + aVal + '</td><td>' + bVal + '</td><td>' + gap + '</td></tr>';
+  }
+
+  function fmtSigned(v, decimals, unit) {
+    var sign = v > 0 ? '+' : v < 0 ? '−' : '';
+    return sign + Math.abs(v).toFixed(decimals) + unit;
+  }
+
+  // Same as fmtSigned but with thousands separators, for whole-number gaps
+  // in the thousands — an area difference reads badly as 82471 instead of
+  // 82,471, while the table's own values all use separators.
+  function fmtSignedGrouped(v, unit) {
+    var sign = v > 0 ? '+' : v < 0 ? '−' : '';
+    return sign + Math.abs(v).toLocaleString('en-US') + unit;
+  }
+
+  // Builds the comparison table for two provinces, all figures computed live
+  // from the provinces data — nothing here is hard-coded.
+  function cmpTableBody(a, b) {
+    var shareA = shareOfNational(a);
+    var shareB = shareOfNational(b);
+    return cmpRow('Capital', esc(a.capital), esc(b.capital), '—')
+      + cmpRow('Population (millions)', a.pop.toFixed(1) + ' m', b.pop.toFixed(1) + ' m', fmtSigned(a.pop - b.pop, 1, ' m'))
+      + cmpRow('Area (km²)', a.area.toLocaleString('en-US'), b.area.toLocaleString('en-US'), fmtSignedGrouped(a.area - b.area, ' km²'))
+      + cmpRow('Density (people/km²)', density(a).toLocaleString('en-US'), density(b).toLocaleString('en-US'), fmtSignedGrouped(density(a) - density(b), ' /km²'))
+      + cmpRow('Share of national population', shareA.toFixed(1) + '%', shareB.toFixed(1) + '%', fmtSigned(shareA - shareB, 1, ' pp'));
+  }
+
+  // Re-paints the compare panel: table body, column headings, and the chart.
+  // Called from mount, from the controls, and from draw() on window resize.
+  function drawCompare() {
+    var a = findProvince(cmpAName);
+    var b = findProvince(cmpBName);
+    var body = document.getElementById('cmp-body');
+    if (body) body.innerHTML = cmpTableBody(a, b);
+    var headA = document.getElementById('cmp-head-a');
+    var headB = document.getElementById('cmp-head-b');
+    if (headA) headA.textContent = a.name;
+    if (headB) headB.textContent = b.name;
+    var cv = document.getElementById('cmp-chart');
+    if (cv) {
+      C.drawPairCompare(cv, [
+        { label: 'Population (millions)', a: a.pop, b: b.pop, fmt: function (v) { return v.toFixed(1) + ' m'; } },
+        { label: 'Density (people/km²)', a: density(a), b: density(b), fmt: function (v) { return Math.round(v).toLocaleString('en-US'); } },
+      ], [a.name, b.name]);
+    }
+  }
+
   function provinces() {
     var top10 = D.provinces.slice().sort(function (a, b) { return b.pop - a.pop; }).slice(0, 10)
       .map(function (p) { return { label: p.name, value: p.pop }; });
@@ -219,6 +303,16 @@
       + '<p><strong>Search</strong> filters by province or capital city. <strong>Tap a column heading</strong> to sort — tap again to reverse. Density is people per square kilometre, computed from the rounded population and area figures.</p>'
       + '<p>Java holds about 56% of the population on about 7% of the land. The densest province is DKI Jakarta (about 16,000 people/km²); the sparsest are the Papuan provinces, under 15 people/km².</p>'
       + sourceNote('BPS, 2024 (rounded approximations)') + '</section></section>'
+      + '<section class="compare-panel"><h2>Bandingkan Provinsi</h2>'
+      + '<p class="lede">Pick any two provinces and compare them side by side — population, area, density and share of the national total, computed live from the same BPS 2024 figures as the table below. Swap flips the pair around.</p>'
+      + '<div class="compare-controls">'
+      + '<label class="compare-pick">Province A <select id="cmp-a" aria-label="First province to compare">' + cmpOptions(cmpAName) + '</select></label>'
+      + '<button class="tab-btn" id="cmp-swap" type="button">⇄ Swap</button>'
+      + '<label class="compare-pick">Province B <select id="cmp-b" aria-label="Second province to compare">' + cmpOptions(cmpBName) + '</select></label>'
+      + '</div>'
+      + '<div class="table-scroll"><table class="data-table compare-table"><thead><tr><th>Measure</th><th id="cmp-head-a">—</th><th id="cmp-head-b">—</th><th>Difference (A − B)</th></tr></thead><tbody id="cmp-body"></tbody></table></div>'
+      + '<canvas id="cmp-chart" class="chart" style="height:240px" role="img" aria-label="Population and density comparison chart"></canvas>'
+      + '<p class="source-note">The chart scales each measure so the larger province fills the plot — the printed figures are the real values. Share of national population is computed from all 38 provinces in the data. Source: BPS, 2024.</p></section>'
       + '<section><h2>All 38 provinces</h2>'
       + '<div class="table-tools"><label class="search-box">Search provinces or capitals <input id="prov-search" type="search" placeholder="e.g. Jawa, Medan, Papua" value="' + esc(provQuery) + '"></label>'
       + '<span class="result-count" id="prov-count"></span></div>'
@@ -257,10 +351,25 @@
           });
         });
         refresh();
+        var selA = document.getElementById('cmp-a');
+        var selB = document.getElementById('cmp-b');
+        var swapBtn = document.getElementById('cmp-swap');
+        if (selA) selA.addEventListener('change', function () { cmpAName = selA.value; drawCompare(); });
+        if (selB) selB.addEventListener('change', function () { cmpBName = selB.value; drawCompare(); });
+        if (swapBtn) swapBtn.addEventListener('click', function () {
+          var tmp = cmpAName;
+          cmpAName = cmpBName;
+          cmpBName = tmp;
+          selA.value = cmpAName;
+          selB.value = cmpBName;
+          drawCompare();
+        });
+        drawCompare();
       },
       draw: function () {
         var cv = document.getElementById('prov-top10');
         if (cv) C.drawHbars(cv, top10, { suffix: ' m' });
+        drawCompare();
       },
     };
   }

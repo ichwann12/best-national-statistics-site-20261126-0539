@@ -1,13 +1,16 @@
 // NusaStat hand-in program (Node 22, standard library only).
-// Copies the site (app/) and its screenshots (screenshots/) from beside this file
-// into the output directory and writes /output/dossier.json with the vendored
-// make.fun dossier library. The library file itself is the kit's copy, unchanged:
-// the scorer rebuilds the dossier with its own copy and compares byte for byte.
+//
+// What it does, in plain terms: it gathers the finished site — the app/
+// folder with every page, chart and number, plus the screenshots/ folder —
+// copies both into the output directory, and writes dossier.json there.
+// The dossier is built by the vendored make.fun library (vendor/), which
+// the scorer runs again on its own copy and compares byte for byte, so
+// this program never edits the library file itself.
 //
 // Outside the grader, MAKEFUN_OUTPUT_DIR stands in for /output:
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
 
-import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-frontend.ts';
@@ -33,3 +36,18 @@ writeFileSync(
     app_max_bytes: 16777216,
   }),
 );
+
+// Sanity check before finishing: the hand-in is useless if the dossier did
+// not actually land, so confirm it exists and is not empty, then print a
+// one-line summary of what was copied for the log.
+{
+  const dossierPath = join(out, 'dossier.json');
+  const dossier = readFileSync(dossierPath);
+  if (dossier.length === 0) throw new Error('dossier.json was written empty');
+  const shots = existsSync(join(out, 'screenshots'))
+    ? readdirSync(join(out, 'screenshots')).length
+    : 0;
+  console.log(
+    `NusaStat hand-in ready: app/ + ${shots} screenshot(s) + dossier.json (${dossier.length} bytes) in ${out}`,
+  );
+}

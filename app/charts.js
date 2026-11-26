@@ -255,10 +255,66 @@
     });
   }
 
+  // Paired comparison bars: two values per measure, one bar per province.
+  // Each measure is scaled so the larger of the pair fills the plot height,
+  // because the measures sit on different scales (millions of people vs
+  // people per km²) — the real figures are printed above each bar, so the
+  // reader always sees the true values, not just the shape.
+  function drawPairCompare(canvas, metrics, names, opts) {
+    opts = opts || {};
+    var s = setupCanvas(canvas);
+    var ctx = s.ctx;
+    var padL = 16, padR = 16, padT = 24, padB = 40;
+    var x0 = padL, y0 = padT, x1 = s.w - padR, y1 = s.h - padB;
+    var colors = [TEAL, AMBER];
+    var n = metrics.length;
+    var slot = (x1 - x0) / n;
+    var groupW = Math.min(140, slot * 0.58);
+    var barW = groupW / 2;
+    ctx.font = '11px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (var i = 0; i < n; i++) {
+      var m = metrics[i];
+      var peak = Math.max(m.a, m.b) || 1;
+      var gx = x0 + slot * (i + 0.5) - groupW / 2;
+      [m.a, m.b].forEach(function (v, j) {
+        // Bars stop at 85% of the plot height: the tallest bar's value label
+        // sits above it, and the legend row above the plot stays clear.
+        var h = (v / peak) * (y1 - y0) * 0.85;
+        var bx = gx + j * barW;
+        ctx.fillStyle = colors[j % colors.length];
+        ctx.beginPath();
+        ctx.fillRect(bx + 2, y1 - h, Math.max(barW - 4, 1), Math.max(h, 1));
+        ctx.fillStyle = INK;
+        ctx.fillText(m.fmt(v), bx + barW / 2, y1 - h - 15);
+      });
+      ctx.fillStyle = MUTED;
+      ctx.fillText(m.label, x0 + slot * (i + 0.5), y1 + 8);
+      ctx.fillText('larger province = 100', x0 + slot * (i + 0.5), y1 + 24);
+    }
+    // Legend, drawn above the plot area, right-aligned like drawGroupedBars.
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    var legendW = 0;
+    names.forEach(function (nm) {
+      legendW += 17 + ctx.measureText(nm).width + 22;
+    });
+    var lx = x1 - (legendW - 22);
+    names.forEach(function (nm, k) {
+      ctx.fillStyle = colors[k % colors.length];
+      ctx.fillRect(lx, y0 - 16, 12, 12);
+      ctx.fillStyle = INK;
+      ctx.fillText(nm, lx + 17, y0 - 10);
+      lx += 17 + ctx.measureText(nm).width + 22;
+    });
+  }
+
   window.NUSACharts = {
     drawBarChart: drawBarChart,
     drawLineChart: drawLineChart,
     drawHbars: drawHbars,
     drawGroupedBars: drawGroupedBars,
+    drawPairCompare: drawPairCompare,
   };
 })();

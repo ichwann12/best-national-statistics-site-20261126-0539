@@ -161,6 +161,27 @@ main { padding: 26px 0 10px; }
   #price-chart { min-height: 300px; }
 }
 
+/* Compare provinces panel */
+.compare-panel {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px; margin-top: 16px;
+}
+.compare-panel h2 { margin-top: 0; }
+.compare-controls {
+  display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap; margin: 4px 0 14px;
+}
+.compare-pick { font-size: 0.95rem; font-weight: 600; }
+.compare-pick select {
+  font: inherit; font-weight: 400; padding: 9px 10px; margin-left: 6px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink);
+  max-width: 100%;
+}
+.compare-pick select:focus { outline: 2px solid var(--teal-light); border-color: var(--teal); }
+.compare-panel .table-scroll { margin-bottom: 14px; }
+.compare-table th[scope="row"] { font-weight: 600; color: var(--teal-dark); }
+.compare-table td { font-variant-numeric: tabular-nums; }
+#cmp-chart { min-height: 240px; }
+
 /* Footer */
 .site-footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 22px 0 30px; color: var(--muted); font-size: 0.9rem; }
 .foot-meta { margin-top: 6px; }
@@ -181,4 +202,7 @@ main { padding: 26px 0 10px; }
   h1 { font-size: 1.6rem; }
   .kpi-value { font-size: 1.4rem; }
   .search-box input { width: 100%; margin: 6px 0 0; }
+  .compare-controls { flex-direction: column; align-items: stretch; gap: 10px; }
+  .compare-pick select { width: 100%; margin: 6px 0 0; }
+  #cmp-swap { align-self: flex-start; }
 }
